@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.example.microservicio_5_asistencias_certificados.dtos.tipoParticipacion;
+import com.example.microservicio_5_asistencias_certificados.modelos.tipoParticipacion.TipoParticipacion;
 
 /**
  *
@@ -20,7 +21,7 @@ public class TipoParticipacionResponse {
     private Integer idTipoParticipacion;
     private String  nombreTipo;
 
-    public TipoParticipacionResponse(TipoParticipacionResponse t) {
+    public TipoParticipacionResponse(TipoParticipacion t) {
         this.idTipoParticipacion = t.getIdTipoParticipacion();
         this.nombreTipo          = t.getNombreTipo();
     }
