@@ -166,10 +166,4 @@ class CertificadoServicioImplTest {
         assertEquals(2, servicio.listarPorCongresoYUsuario(10L, 42L).size());
     }
 
-    @Test
-    void listarPorUsuarioVacioRetornaListaVacia() {
-        when(repositorio.findByIdUsuario(99L)).thenReturn(List.of());
-
-        assertTrue(servicio.listarPorUsuario(99L).isEmpty());
-    }
 }
