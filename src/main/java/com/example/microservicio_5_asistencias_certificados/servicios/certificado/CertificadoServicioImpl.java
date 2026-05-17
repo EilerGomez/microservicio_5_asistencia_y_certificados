@@ -11,6 +11,7 @@ package com.example.microservicio_5_asistencias_certificados.servicios.certifica
 
 import com.example.microservicio_5_asistencias_certificados.dtos.certificado.CertificadoRequest;
 import com.example.microservicio_5_asistencias_certificados.dtos.certificado.CertificadoResponse;
+import com.example.microservicio_5_asistencias_certificados.dtos.certificado.CertificadoUpdateRequest;
 import com.example.microservicio_5_asistencias_certificados.excepciones.RecursoNoEncontradoException;
 import com.example.microservicio_5_asistencias_certificados.modelos.certificado.Certificado;
 import com.example.microservicio_5_asistencias_certificados.modelos.certificado.TipoCertificadoEnum;
@@ -107,5 +108,31 @@ public class CertificadoServicioImpl implements CertificadoServicio {
                 .stream()
                 .map(CertificadoResponse::new)
                 .collect(Collectors.toList());
+    }
+    
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public CertificadoResponse actualizar(Long id, CertificadoUpdateRequest request)
+            throws RecursoNoEncontradoException {
+
+        Certificado certificado = repositorio.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException(
+                        "Certificado con ID " + id + " no encontrado"));
+
+        // PRESENTACION requiere idActividad
+        if (TipoCertificadoEnum.PRESENTACION.equals(request.getTipoCertificado())
+                && request.getIdActividad() == null) {
+            throw new IllegalArgumentException(
+                    "El certificado de PRESENTACION requiere el id de la actividad");
+        }
+
+        certificado.setIdCongreso(request.getIdCongreso());
+        certificado.setIdUsuario(request.getIdUsuario());
+        certificado.setTipoCertificado(request.getTipoCertificado());
+        certificado.setIdActividad(request.getIdActividad());
+        certificado.setUrlCertificado(request.getUrlCertificado());
+
+        return new CertificadoResponse(repositorio.save(certificado));
     }
 }

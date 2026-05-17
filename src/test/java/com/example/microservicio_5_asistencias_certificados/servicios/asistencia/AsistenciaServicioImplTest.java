@@ -11,9 +11,11 @@ package com.example.microservicio_5_asistencias_certificados.servicios.asistenci
 
 import com.example.microservicio_5_asistencias_certificados.dtos.asistencia.AsistenciaRequest;
 import com.example.microservicio_5_asistencias_certificados.dtos.asistencia.AsistenciaResponse;
+import com.example.microservicio_5_asistencias_certificados.dtos.asistencia.AsistenciaUpdateRequest;
 import com.example.microservicio_5_asistencias_certificados.excepciones.RecursoNoEncontradoException;
 import com.example.microservicio_5_asistencias_certificados.modelos.asistencia.Asistencia;
 import com.example.microservicio_5_asistencias_certificados.modelos.tipoParticipacion.TipoParticipacion;
+import com.example.microservicio_5_asistencias_certificados.modelos.tipoParticipacion.TipoParticipacionEnum;
 import com.example.microservicio_5_asistencias_certificados.repositorios.asistencia.AsistenciaRepositorio;
 import com.example.microservicio_5_asistencias_certificados.repositorios.tipoParticipacion.TipoParticipacionRepositorio;
 import org.junit.jupiter.api.BeforeEach;
@@ -149,5 +151,97 @@ class AsistenciaServicioImplTest {
                 .thenReturn(false);
 
         assertFalse(servicio.existeAsistencia(10L, 99L));
+    }
+    
+
+    @Test
+    void actualizarAsistenciaExitosoRetornaResponse()
+            throws RecursoNoEncontradoException {
+
+        TipoParticipacion ponente = TipoParticipacion.builder()
+                .idTipoParticipacion(TipoParticipacionEnum.PONENTE.getId())
+                .nombreTipo(TipoParticipacionEnum.PONENTE.name()).build();
+
+        AsistenciaUpdateRequest updateRequest = AsistenciaUpdateRequest.builder()
+                .idActividad(20L).idUsuario(99L)
+                .idTipoParticipacion(TipoParticipacionEnum.PONENTE.getId()).build();
+
+        Asistencia asistenciaActualizada = Asistencia.builder()
+                .idAsistencia(1L).idActividad(20L).idUsuario(99L)
+                .tipoParticipacion(ponente).registradoPor(2L).build();
+
+        when(asistenciaRepositorio.findById(1L))
+                .thenReturn(Optional.of(asistencia));
+        when(tipoRepositorio.findById(TipoParticipacionEnum.PONENTE.getId()))
+                .thenReturn(Optional.of(ponente));
+        when(asistenciaRepositorio.save(any()))
+                .thenReturn(asistenciaActualizada);
+
+        AsistenciaResponse r = servicio.actualizar(1L, updateRequest);
+
+        assertNotNull(r);
+        assertEquals(20L, r.getIdActividad());
+        assertEquals(99L, r.getIdUsuario());
+        assertEquals(TipoParticipacionEnum.PONENTE.name(),
+                r.getNombreTipoParticipacion());
+        verify(asistenciaRepositorio).save(any());
+    }
+
+    @Test
+    void actualizarAsistenciaNoExisteLanzaExcepcion() {
+        AsistenciaUpdateRequest updateRequest = AsistenciaUpdateRequest.builder()
+                .idActividad(20L).idUsuario(99L)
+                .idTipoParticipacion(TipoParticipacionEnum.PONENTE.getId()).build();
+
+        when(asistenciaRepositorio.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(RecursoNoEncontradoException.class,
+                () -> servicio.actualizar(99L, updateRequest));
+        verify(asistenciaRepositorio, never()).save(any());
+    }
+
+    @Test
+    void actualizarAsistenciaTipoNoExisteLanzaExcepcion() {
+        AsistenciaUpdateRequest updateRequest = AsistenciaUpdateRequest.builder()
+                .idActividad(20L).idUsuario(99L)
+                .idTipoParticipacion(99).build();
+
+        when(asistenciaRepositorio.findById(1L))
+                .thenReturn(Optional.of(asistencia));
+        when(tipoRepositorio.findById(99)).thenReturn(Optional.empty());
+
+        assertThrows(RecursoNoEncontradoException.class,
+                () -> servicio.actualizar(1L, updateRequest));
+        verify(asistenciaRepositorio, never()).save(any());
+    }
+
+    @Test
+    void actualizarAsistenciaCambiaActividadYUsuario()
+            throws RecursoNoEncontradoException {
+
+        AsistenciaUpdateRequest updateRequest = AsistenciaUpdateRequest.builder()
+                .idActividad(50L).idUsuario(77L)
+                .idTipoParticipacion(TipoParticipacionEnum.TALLERISTA.getId()).build();
+
+        TipoParticipacion tallerista = TipoParticipacion.builder()
+                .idTipoParticipacion(TipoParticipacionEnum.TALLERISTA.getId())
+                .nombreTipo(TipoParticipacionEnum.TALLERISTA.name()).build();
+
+        Asistencia actualizada = Asistencia.builder()
+                .idAsistencia(1L).idActividad(50L).idUsuario(77L)
+                .tipoParticipacion(tallerista).registradoPor(2L).build();
+
+        when(asistenciaRepositorio.findById(1L))
+                .thenReturn(Optional.of(asistencia));
+        when(tipoRepositorio.findById(TipoParticipacionEnum.TALLERISTA.getId()))
+                .thenReturn(Optional.of(tallerista));
+        when(asistenciaRepositorio.save(any())).thenReturn(actualizada);
+
+        AsistenciaResponse r = servicio.actualizar(1L, updateRequest);
+
+        assertEquals(50L, r.getIdActividad());
+        assertEquals(77L, r.getIdUsuario());
+        assertEquals(TipoParticipacionEnum.TALLERISTA.name(),
+                r.getNombreTipoParticipacion());
     }
 }

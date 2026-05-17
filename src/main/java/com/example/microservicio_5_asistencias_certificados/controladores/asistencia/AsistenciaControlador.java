@@ -6,6 +6,7 @@ package com.example.microservicio_5_asistencias_certificados.controladores.asist
 
 import com.example.microservicio_5_asistencias_certificados.dtos.asistencia.AsistenciaRequest;
 import com.example.microservicio_5_asistencias_certificados.dtos.asistencia.AsistenciaResponse;
+import com.example.microservicio_5_asistencias_certificados.dtos.asistencia.AsistenciaUpdateRequest;
 import com.example.microservicio_5_asistencias_certificados.excepciones.RecursoNoEncontradoException;
 import com.example.microservicio_5_asistencias_certificados.servicios.asistencia.AsistenciaServicio;
 import jakarta.validation.Valid;
@@ -17,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -76,5 +78,14 @@ public class AsistenciaControlador {
             @RequestParam Long idActividad,
             @RequestParam Long idUsuario) {
         return ResponseEntity.ok(servicio.existeAsistencia(idActividad, idUsuario));
+    }
+    
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN_CONGRESO') or hasRole('ADMIN_SISTEMA')")
+    public ResponseEntity<AsistenciaResponse> actualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody AsistenciaUpdateRequest request)
+            throws RecursoNoEncontradoException {
+        return ResponseEntity.ok(servicio.actualizar(id, request));
     }
 }

@@ -11,6 +11,7 @@ package com.example.microservicio_5_asistencias_certificados.controladores.certi
 
 import com.example.microservicio_5_asistencias_certificados.dtos.certificado.CertificadoRequest;
 import com.example.microservicio_5_asistencias_certificados.dtos.certificado.CertificadoResponse;
+import com.example.microservicio_5_asistencias_certificados.dtos.certificado.CertificadoUpdateRequest;
 import com.example.microservicio_5_asistencias_certificados.excepciones.RecursoNoEncontradoException;
 import com.example.microservicio_5_asistencias_certificados.servicios.certificado.CertificadoServicio;
 import jakarta.validation.Valid;
@@ -72,5 +73,13 @@ public class CertificadoControlador {
             @PathVariable Long idUsuario) {
         return ResponseEntity.ok(
                 servicio.listarPorCongresoYUsuario(idCongreso, idUsuario));
+    }
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN_CONGRESO') or hasRole('ADMIN_SISTEMA')")
+    public ResponseEntity<CertificadoResponse> actualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody CertificadoUpdateRequest request)
+            throws RecursoNoEncontradoException {
+        return ResponseEntity.ok(servicio.actualizar(id, request));
     }
 }

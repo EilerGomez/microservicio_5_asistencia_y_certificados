@@ -12,7 +12,9 @@ package com.example.microservicio_5_asistencias_certificados.controladores.asist
 
 import com.example.microservicio_5_asistencias_certificados.dtos.asistencia.AsistenciaRequest;
 import com.example.microservicio_5_asistencias_certificados.dtos.asistencia.AsistenciaResponse;
+import com.example.microservicio_5_asistencias_certificados.dtos.asistencia.AsistenciaUpdateRequest;
 import com.example.microservicio_5_asistencias_certificados.excepciones.RecursoNoEncontradoException;
+import com.example.microservicio_5_asistencias_certificados.modelos.tipoParticipacion.TipoParticipacionEnum;
 import com.example.microservicio_5_asistencias_certificados.servicios.asistencia.AsistenciaServicio;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -162,5 +164,57 @@ class AsistenciaControladorTest {
         when(servicio.existeAsistencia(10L, 99L)).thenReturn(false);
 
         assertFalse(controlador.existeAsistencia(10L, 99L).getBody());
+    }
+    
+    // update
+    @Test
+    void actualizarRetorna200() throws RecursoNoEncontradoException {
+        AsistenciaUpdateRequest updateRequest = AsistenciaUpdateRequest.builder()
+                .idActividad(20L).idUsuario(99L)
+                .idTipoParticipacion(TipoParticipacionEnum.PONENTE.getId()).build();
+
+        AsistenciaResponse resActualizada = AsistenciaResponse.builder()
+                .idAsistencia(1L).idActividad(20L).idUsuario(99L)
+                .idTipoParticipacion(TipoParticipacionEnum.PONENTE.getId())
+                .nombreTipoParticipacion(TipoParticipacionEnum.PONENTE.name())
+                .registradoPor(2L).build();
+
+        when(servicio.actualizar(eq(1L), any())).thenReturn(resActualizada);
+
+        ResponseEntity<AsistenciaResponse> r =
+                controlador.actualizar(1L, updateRequest);
+
+        assertEquals(HttpStatus.OK, r.getStatusCode());
+        assertEquals(20L, r.getBody().getIdActividad());
+        assertEquals(99L, r.getBody().getIdUsuario());
+        assertEquals(TipoParticipacionEnum.PONENTE.name(),
+                r.getBody().getNombreTipoParticipacion());
+        verify(servicio).actualizar(eq(1L), any());
+    }
+
+    @Test
+    void actualizarNoExisteLanzaExcepcion() throws RecursoNoEncontradoException {
+        AsistenciaUpdateRequest updateRequest = AsistenciaUpdateRequest.builder()
+                .idActividad(20L).idUsuario(99L)
+                .idTipoParticipacion(TipoParticipacionEnum.PONENTE.getId()).build();
+
+        when(servicio.actualizar(eq(99L), any()))
+                .thenThrow(new RecursoNoEncontradoException("99"));
+
+        assertThrows(RecursoNoEncontradoException.class,
+                () -> controlador.actualizar(99L, updateRequest));
+    }
+
+    @Test
+    void actualizarTipoNoExisteLanzaExcepcion() throws RecursoNoEncontradoException {
+        AsistenciaUpdateRequest updateRequest = AsistenciaUpdateRequest.builder()
+                .idActividad(20L).idUsuario(99L)
+                .idTipoParticipacion(99).build();
+
+        when(servicio.actualizar(eq(1L), any()))
+                .thenThrow(new RecursoNoEncontradoException("Tipo 99 no encontrado"));
+
+        assertThrows(RecursoNoEncontradoException.class,
+                () -> controlador.actualizar(1L, updateRequest));
     }
 }

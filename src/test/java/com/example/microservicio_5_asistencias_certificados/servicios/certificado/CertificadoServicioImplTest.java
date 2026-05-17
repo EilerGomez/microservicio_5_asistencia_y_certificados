@@ -12,6 +12,7 @@ package com.example.microservicio_5_asistencias_certificados.servicios.certifica
 
 import com.example.microservicio_5_asistencias_certificados.dtos.certificado.CertificadoRequest;
 import com.example.microservicio_5_asistencias_certificados.dtos.certificado.CertificadoResponse;
+import com.example.microservicio_5_asistencias_certificados.dtos.certificado.CertificadoUpdateRequest;
 import com.example.microservicio_5_asistencias_certificados.excepciones.RecursoNoEncontradoException;
 import com.example.microservicio_5_asistencias_certificados.modelos.certificado.Certificado;
 import com.example.microservicio_5_asistencias_certificados.modelos.certificado.TipoCertificadoEnum;
@@ -164,6 +165,108 @@ class CertificadoServicioImplTest {
                 .thenReturn(List.of(certParticipacion, certPresentacion));
 
         assertEquals(2, servicio.listarPorCongresoYUsuario(10L, 42L).size());
+    }
+    
+
+    @Test
+    void actualizarCertificadoParticipacionExitosoRetornaResponse()
+            throws RecursoNoEncontradoException {
+
+        CertificadoUpdateRequest updateRequest = CertificadoUpdateRequest.builder()
+                .idCongreso(20L).idUsuario(99L)
+                .tipoCertificado(TipoCertificadoEnum.PARTICIPACION)
+                .urlCertificado("https://nueva-url.pdf").build();
+
+        Certificado certActualizado = Certificado.builder()
+                .idCertificado(1L).idCongreso(20L).idUsuario(99L)
+                .tipoCertificado(TipoCertificadoEnum.PARTICIPACION)
+                .urlCertificado("https://nueva-url.pdf").build();
+
+        when(repositorio.findById(1L))
+                .thenReturn(Optional.of(certParticipacion));
+        when(repositorio.save(any())).thenReturn(certActualizado);
+
+        CertificadoResponse r = servicio.actualizar(1L, updateRequest);
+
+        assertNotNull(r);
+        assertEquals(20L, r.getIdCongreso());
+        assertEquals(99L, r.getIdUsuario());
+        assertEquals("https://nueva-url.pdf", r.getUrlCertificado());
+        verify(repositorio).save(any());
+    }
+
+    @Test
+    void actualizarCertificadoPresentacionConActividadExitoso()
+            throws RecursoNoEncontradoException {
+
+        CertificadoUpdateRequest updateRequest = CertificadoUpdateRequest.builder()
+                .idCongreso(10L).idUsuario(42L)
+                .tipoCertificado(TipoCertificadoEnum.PRESENTACION)
+                .idActividad(7L)
+                .urlCertificado("https://nueva-url.pdf").build();
+
+        Certificado certActualizado = Certificado.builder()
+                .idCertificado(2L).idCongreso(10L).idUsuario(42L)
+                .tipoCertificado(TipoCertificadoEnum.PRESENTACION)
+                .idActividad(7L).urlCertificado("https://nueva-url.pdf").build();
+
+        when(repositorio.findById(2L))
+                .thenReturn(Optional.of(certPresentacion));
+        when(repositorio.save(any())).thenReturn(certActualizado);
+
+        CertificadoResponse r = servicio.actualizar(2L, updateRequest);
+
+        assertNotNull(r);
+        assertEquals(TipoCertificadoEnum.PRESENTACION, r.getTipoCertificado());
+        assertEquals(7L, r.getIdActividad());
+    }
+
+    @Test
+    void actualizarCertificadoPresentacionSinActividadLanzaIllegalArgument() {
+        CertificadoUpdateRequest updateRequest = CertificadoUpdateRequest.builder()
+                .idCongreso(10L).idUsuario(42L)
+                .tipoCertificado(TipoCertificadoEnum.PRESENTACION)
+                .idActividad(null).build();
+
+        when(repositorio.findById(1L))
+                .thenReturn(Optional.of(certParticipacion));
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> servicio.actualizar(1L, updateRequest));
+        assertTrue(ex.getMessage().contains("PRESENTACION"));
+        verify(repositorio, never()).save(any());
+    }
+
+    @Test
+    void actualizarCertificadoNoExisteLanzaExcepcion() {
+        CertificadoUpdateRequest updateRequest = CertificadoUpdateRequest.builder()
+                .idCongreso(10L).idUsuario(42L)
+                .tipoCertificado(TipoCertificadoEnum.PARTICIPACION).build();
+
+        when(repositorio.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(RecursoNoEncontradoException.class,
+                () -> servicio.actualizar(99L, updateRequest));
+        verify(repositorio, never()).save(any());
+    }
+
+    @Test
+    void actualizarCertificadoUrlNullaSeMantiene()
+            throws RecursoNoEncontradoException {
+
+        CertificadoUpdateRequest updateRequest = CertificadoUpdateRequest.builder()
+                .idCongreso(10L).idUsuario(42L)
+                .tipoCertificado(TipoCertificadoEnum.PARTICIPACION)
+                .urlCertificado(null).build();
+
+        when(repositorio.findById(1L))
+                .thenReturn(Optional.of(certParticipacion));
+        when(repositorio.save(any())).thenReturn(certParticipacion);
+
+        CertificadoResponse r = servicio.actualizar(1L, updateRequest);
+
+        assertNotNull(r);
+        verify(repositorio).save(any());
     }
 
 }
