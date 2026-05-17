@@ -6,6 +6,7 @@ package com.example.microservicio_5_asistencias_certificados.servicios.asistenci
 
 import com.example.microservicio_5_asistencias_certificados.dtos.asistencia.AsistenciaRequest;
 import com.example.microservicio_5_asistencias_certificados.dtos.asistencia.AsistenciaResponse;
+import com.example.microservicio_5_asistencias_certificados.dtos.asistencia.AsistenciaUpdateRequest;
 import com.example.microservicio_5_asistencias_certificados.excepciones.RecursoNoEncontradoException;
 import com.example.microservicio_5_asistencias_certificados.modelos.asistencia.Asistencia;
 import com.example.microservicio_5_asistencias_certificados.modelos.tipoParticipacion.TipoParticipacion;
@@ -93,5 +94,27 @@ public class AsistenciaServicioImpl implements AsistenciaServicio {
     public boolean existeAsistencia(Long idActividad, Long idUsuario) {
         return asistenciaRepositorio
                 .existsByIdActividadAndIdUsuario(idActividad, idUsuario);
+    }
+    
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public AsistenciaResponse actualizar(Long id, AsistenciaUpdateRequest request)
+            throws RecursoNoEncontradoException {
+
+        Asistencia asistencia = asistenciaRepositorio.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException(
+                        "Asistencia con ID " + id + " no encontrada"));
+
+        TipoParticipacion tipo = tipoRepositorio
+                .findById(request.getIdTipoParticipacion())
+                .orElseThrow(() -> new RecursoNoEncontradoException(
+                        "Tipo de participación con ID " +
+                        request.getIdTipoParticipacion() + " no encontrado"));
+
+        asistencia.setIdActividad(request.getIdActividad());
+        asistencia.setIdUsuario(request.getIdUsuario());
+        asistencia.setTipoParticipacion(tipo);
+
+        return new AsistenciaResponse(asistenciaRepositorio.save(asistencia));
     }
 }

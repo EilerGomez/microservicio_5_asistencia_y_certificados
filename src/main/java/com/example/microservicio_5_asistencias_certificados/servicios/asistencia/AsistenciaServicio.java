@@ -6,6 +6,7 @@ package com.example.microservicio_5_asistencias_certificados.servicios.asistenci
 
 import com.example.microservicio_5_asistencias_certificados.dtos.asistencia.AsistenciaRequest;
 import com.example.microservicio_5_asistencias_certificados.dtos.asistencia.AsistenciaResponse;
+import com.example.microservicio_5_asistencias_certificados.dtos.asistencia.AsistenciaUpdateRequest;
 import com.example.microservicio_5_asistencias_certificados.excepciones.RecursoNoEncontradoException;
 import java.util.List;
 
@@ -25,4 +26,7 @@ public interface AsistenciaServicio {
     List<AsistenciaResponse> listarPorUsuario(Long idUsuario);
 
     boolean existeAsistencia(Long idActividad, Long idUsuario);
+    
+    AsistenciaResponse actualizar(Long id, AsistenciaUpdateRequest request)
+        throws RecursoNoEncontradoException;
 }

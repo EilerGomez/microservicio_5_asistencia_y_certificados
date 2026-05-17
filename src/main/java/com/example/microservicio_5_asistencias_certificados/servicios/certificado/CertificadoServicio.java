@@ -12,6 +12,7 @@ package com.example.microservicio_5_asistencias_certificados.servicios.certifica
 
 import com.example.microservicio_5_asistencias_certificados.dtos.certificado.CertificadoRequest;
 import com.example.microservicio_5_asistencias_certificados.dtos.certificado.CertificadoResponse;
+import com.example.microservicio_5_asistencias_certificados.dtos.certificado.CertificadoUpdateRequest;
 import com.example.microservicio_5_asistencias_certificados.excepciones.RecursoNoEncontradoException;
 import java.util.List;
 
@@ -28,4 +29,7 @@ public interface CertificadoServicio {
     List<CertificadoResponse> listarPorCongreso(Long idCongreso);
 
     List<CertificadoResponse> listarPorCongresoYUsuario(Long idCongreso, Long idUsuario);
+    
+    CertificadoResponse actualizar(Long id, CertificadoUpdateRequest request)
+            throws RecursoNoEncontradoException;
 }
