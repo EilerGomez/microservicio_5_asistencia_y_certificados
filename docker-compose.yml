@@ -1,0 +1,59 @@
+version: "3.8"
+
+services:
+  db-asistencias:
+    image: mysql:8.0
+    container_name: ms-asistencias-db
+    environment:
+      MYSQL_DATABASE: db_asistencia_certificados
+      MYSQL_USER: ms_asistencias
+      MYSQL_PASSWORD: "1324"
+      MYSQL_ROOT_PASSWORD: "1324"
+    ports:
+      - "5437:5437"
+    command: ["--port=5437", "--default-authentication-plugin=mysql_native_password"]
+    volumes:
+      - mysqldata_asistencias:/var/lib/mysql
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -P 5437 -u root -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - microservices-net
+
+  ms-asistencias:
+    build: .
+    container_name: ms-asistencias
+    ports:
+      - "8084:8084"
+    environment:
+      - SERVER_PORT=8084
+      - SPRING_PROFILES_ACTIVE=dev
+      - DB_HOST=db-asistencias
+      - DB_PORT=5437
+      - DB_NAME=db_asistencia_certificados
+      - DB_USERNAME=ms_asistencias
+      - DB_PASSWORD=1324
+      - JWT_SECRET=${JWT_SECRET:-VGhpc0lzQVN1cGVyU2VjdXJlSldUU2VjcmV0S2V5Rm9yRGV2TXVzdEJlQXRMZWFzdDMyQ2hhcnM=}
+      - EUREKA_SERVER_URL=${EUREKA_SERVER_URL:-https://eureka-service-a6b0enhtggeqgwd7.eastus2-01.azurewebsites.net/eureka/}
+      - EUREKA_CLIENT_ENABLED=${EUREKA_CLIENT_ENABLED:-true}
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=${EUREKA_CLIENT_REGISTER_WITH_EUREKA:-true}
+      - EUREKA_CLIENT_FETCH_REGISTRY=${EUREKA_CLIENT_FETCH_REGISTRY:-true}
+    depends_on:
+      db-asistencias:
+        condition: service_healthy
+    restart: always
+    env_file:
+      - .env
+    networks:
+      - microservices-net
+
+networks:
+  microservices-net:
+    external: true
+
+volumes:
+  mysqldata_asistencias:
+    name: ms_asistencias_mysql_data
