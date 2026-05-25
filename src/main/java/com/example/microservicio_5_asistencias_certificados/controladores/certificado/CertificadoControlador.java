@@ -60,14 +60,12 @@ public class CertificadoControlador {
     }
 
     @GetMapping("/congreso/{idCongreso}")
-    @PreAuthorize("hasRole('ADMIN_CONGRESO') or hasRole('ADMIN_SISTEMA')")
     public ResponseEntity<List<CertificadoResponse>> listarPorCongreso(
             @PathVariable Long idCongreso) {
         return ResponseEntity.ok(servicio.listarPorCongreso(idCongreso));
     }
 
     @GetMapping("/congreso/{idCongreso}/usuario/{idUsuario}")
-    @PreAuthorize("hasRole('ADMIN_CONGRESO') or hasRole('ADMIN_SISTEMA')")
     public ResponseEntity<List<CertificadoResponse>> listarPorCongresoYUsuario(
             @PathVariable Long idCongreso,
             @PathVariable Long idUsuario) {
