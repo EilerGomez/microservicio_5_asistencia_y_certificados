@@ -54,14 +54,12 @@ public class AsistenciaControlador {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN_CONGRESO') or hasRole('ADMIN_SISTEMA')")
     public ResponseEntity<AsistenciaResponse> obtenerPorId(
             @PathVariable Long id) throws RecursoNoEncontradoException {
         return ResponseEntity.ok(servicio.obtenerPorId(id));
     }
 
     @GetMapping("/actividad/{idActividad}")
-    @PreAuthorize("hasRole('ADMIN_CONGRESO') or hasRole('ADMIN_SISTEMA')")
     public ResponseEntity<List<AsistenciaResponse>> listarPorActividad(
             @PathVariable Long idActividad) {
         return ResponseEntity.ok(servicio.listarPorActividad(idActividad));
@@ -73,7 +71,6 @@ public class AsistenciaControlador {
     }
 
     @GetMapping("/existe")
-    @PreAuthorize("hasRole('ADMIN_CONGRESO') or hasRole('ADMIN_SISTEMA')")
     public ResponseEntity<Boolean> existeAsistencia(
             @RequestParam Long idActividad,
             @RequestParam Long idUsuario) {
