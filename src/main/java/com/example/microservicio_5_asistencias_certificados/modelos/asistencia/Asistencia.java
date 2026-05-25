@@ -44,4 +44,7 @@ public class Asistencia {
     @Column(name = "registrado_en", updatable = false, insertable = false,
             columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime registradoEn;
+    
+    @Column(name = "id_congreso")
+    private Long idCongreso;
 }

@@ -20,6 +20,8 @@ public class AsistenciaRequest {
 
     @NotNull(message = "El id de la actividad es obligatorio")
     private Long idActividad;
+    
+    private Long idCongreso;
 
     @NotNull(message = "El id del usuario es obligatorio")
     private Long idUsuario;

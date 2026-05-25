@@ -15,6 +15,7 @@ import com.example.microservicio_5_asistencias_certificados.dtos.certificado.Cer
 import com.example.microservicio_5_asistencias_certificados.excepciones.RecursoNoEncontradoException;
 import com.example.microservicio_5_asistencias_certificados.modelos.certificado.Certificado;
 import com.example.microservicio_5_asistencias_certificados.modelos.certificado.TipoCertificadoEnum;
+import com.example.microservicio_5_asistencias_certificados.repositorios.asistencia.AsistenciaRepositorio;
 import com.example.microservicio_5_asistencias_certificados.repositorios.certificado.CertificadoRepositorio;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,9 +26,11 @@ import java.util.stream.Collectors;
 public class CertificadoServicioImpl implements CertificadoServicio {
 
     private final CertificadoRepositorio repositorio;
+    private final AsistenciaRepositorio asistenciaRepositorio;
 
-    public CertificadoServicioImpl(CertificadoRepositorio repositorio) {
+    public CertificadoServicioImpl(CertificadoRepositorio repositorio, AsistenciaRepositorio asistenciaRepositorio) {
         this.repositorio = repositorio;
+        this.asistenciaRepositorio=asistenciaRepositorio;
     }
 
     @Override
@@ -41,7 +44,7 @@ public class CertificadoServicioImpl implements CertificadoServicio {
             throw new IllegalArgumentException(
                     "El certificado de PRESENTACION requiere el id de la actividad");
         }
-
+        
         // Verificar duplicado sehun el tipo
         if (TipoCertificadoEnum.PARTICIPACION.equals(request.getTipoCertificado())) {
             if (repositorio.existsByIdCongresoAndIdUsuarioAndTipoCertificado(
@@ -50,6 +53,15 @@ public class CertificadoServicioImpl implements CertificadoServicio {
                 throw new IllegalStateException(
                         "El usuario ya tiene certificado de PARTICIPACION " +
                         "en este congreso");
+            }
+            
+            long totalAsistencias = asistenciaRepositorio
+                .countActividadesAsistidasPorCongresoYUsuario(request.getIdCongreso(), request.getIdUsuario());
+
+            if (totalAsistencias < 3) {
+                throw new IllegalStateException(
+                        "El usuario debe tener asistencia registrada en al menos 3 actividades del congreso"
+                );
             }
         } else {
             if (repositorio.existsByIdActividadAndIdUsuarioAndTipoCertificado(

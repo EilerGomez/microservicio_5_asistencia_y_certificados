@@ -8,6 +8,8 @@ import com.example.microservicio_5_asistencias_certificados.modelos.asistencia.A
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 /**
  *
@@ -25,4 +27,21 @@ public interface AsistenciaRepositorio extends JpaRepository<Asistencia, Long> {
             Long idActividad, Long idUsuario);
 
     boolean existsByIdActividadAndIdUsuario(Long idActividad, Long idUsuario);
+
+    List<Asistencia> findByIdCongreso(Long idCongreso);
+
+    List<Asistencia> findByIdCongresoAndIdUsuario(Long idCongreso, Long idUsuario);
+
+    boolean existsByIdCongresoAndIdUsuario(Long idCongreso, Long idUsuario);
+
+    @Query("""
+           SELECT COUNT(DISTINCT a.idActividad)
+           FROM Asistencia a
+           WHERE a.idCongreso = :idCongreso
+           AND a.idUsuario = :idUsuario
+           """)
+    long countActividadesAsistidasPorCongresoYUsuario(
+            @Param("idCongreso") Long idCongreso,
+            @Param("idUsuario") Long idUsuario
+    );
 }

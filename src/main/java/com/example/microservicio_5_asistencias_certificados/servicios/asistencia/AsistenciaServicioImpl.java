@@ -53,6 +53,7 @@ public class AsistenciaServicioImpl implements AsistenciaServicio {
 
         Asistencia asistencia = Asistencia.builder()
                 .idActividad(request.getIdActividad())
+                .idCongreso(request.getIdCongreso())
                 .idUsuario(request.getIdUsuario())
                 .tipoParticipacion(tipo)
                 .registradoPor(registradoPor)
